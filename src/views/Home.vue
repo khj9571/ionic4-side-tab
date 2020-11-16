@@ -9,9 +9,15 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-button @click="openStart">Open Start Menu</ion-button>
-      <ion-button @click="openEnd">Open End Menu</ion-button>
-      <ion-icon @click="onClick" name="call-outline"></ion-icon>
+      <vue-daum-map
+        :appKey="appKey"
+        :center.sync="center"
+        :level.sync="level"
+        :mapTypeId="mapTypeId"
+        :libraries="libraries"
+        @load="onLoad"
+        style="width: 100%; height: 100%"
+      />
     </ion-content>
   </div>
 </template>
@@ -24,28 +30,38 @@
 //   "md-map": map.md
 // });
 
-import AlertIcon from "vue-ionicons/dist/ios-alert.vue";
 import MdMenuIcon from "vue-ionicons/dist/md-menu.vue";
+
+import VueDaumMap from "vue-daum-map";
+
 export default {
   components: {
-    AlertIcon,
+    VueDaumMap,
     MdMenuIcon,
   },
+  data: () => {
+    return {
+      appKey: "fc5d8d39927c118100f488a8296beb60", // 테스트용 appkey    center: { lat: 37.5411, lng: 127.068 },
+      center: { lat: 37.5309123241908, lng: 127.0007353858026 }, // 지도의 중심 좌표 33.450701, 126.570667
+      level: 13, // 지도의 레벨(확대, 축소 정도),127.0007353858026 /  37.5309123241908
+      mapTypeId: VueDaumMap.MapTypeId.NORMAL, // 맵 타입
+      libraries: [], // 추가로 불러올 라이브러리
+      map: null, // 지도 객체. 지도가 로드되면 할당됨.
+      markers: [],
+    };
+  },
   methods: {
-    onClick() {
-      alert("a");
-    },
+    onLoad(map) {
+      this.map = map;
 
-    openStart() {
-      document.querySelector("ion-menu-controller").open("start");
-    },
-    openEnd() {
-      document.querySelector("ion-menu-controller").open("end");
+      // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+      var mapTypeControl = new kakao.maps.MapTypeControl();
+      map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+      // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+      var zoomControl = new kakao.maps.ZoomControl();
+      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
     },
   },
-  mounted() {
-
-    alert('ggg')
-  }
 };
 </script>
