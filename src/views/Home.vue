@@ -43,5 +43,9 @@ export default {
       document.querySelector("ion-menu-controller").open("end");
     },
   },
+  mounted() {
+
+    alert('ggg')
+  }
 };
 </script>
