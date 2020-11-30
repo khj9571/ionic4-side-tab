@@ -63,7 +63,7 @@ export default {
       infowindow: null, // 인포 윈도우 참조 객체
       geocoder: null,
       menuInfowindow: null,
-      displayedMenuInfowindow: false
+      displayedMenuInfowindow: false,
     };
   },
   methods: {
@@ -87,16 +87,15 @@ export default {
         infowindow = new kakao.maps.InfoWindow({ zindex: 1 }); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
 
       kakao.maps.event.addListener(map, "click", (mouseEvent) => {
-
-         if(this.displayedMenuInfowindow) {
-
-           console.log(this.menuInfowindow)
-             this.menuInfowindow.close()
-             this.displayedMenuInfowindow = false
-         }
-
+        if (this.displayedMenuInfowindow) {
+          console.log(this.menuInfowindow);
+          this.menuInfowindow.close();
+          this.displayedMenuInfowindow = false;
+        }
 
         this.searchDetailAddrFromCoords(mouseEvent.latLng, (result, status) => {
+          console.log(mouseEvent);
+
           if (status === kakao.maps.services.Status.OK) {
             var detailAddr = !!result[0].road_address
               ? "<div>도로명주소 : " +
@@ -126,10 +125,16 @@ export default {
       // 마커에 클릭이벤트를 등록합니다
       kakao.maps.event.addListener(marker, "click", () => {
         // 마커 위에 인포윈도우를 표시합니다
-        //infowindow.open(map, marker);
 
-        this.menuInfowindow.open(map, marker);
-        this.displayedMenuInfowindow = true;
+        if (!this.displayedMenuInfowindow) {
+          this.menuInfowindow.open(map, marker);
+          this.displayedMenuInfowindow = true;
+
+          this.infowonodwReset();
+        } else {
+          this.menuInfowindow.close();
+          this.displayedMenuInfowindow = false;
+        }
       });
     },
     searchAddrFromCoords(coords, callback) {
@@ -160,20 +165,48 @@ export default {
       }
     },
     createInforMenu() {
-      this.menuInfowindow = new kakao.maps.InfoWindow({title:'메뉴', zindex: 1 });
-      var content = `
-        <div>
-            <ul style='list-style:none;'> 
+      this.menuInfowindow = new kakao.maps.InfoWindow({
+        title: "메뉴",
+        zindex: 1,
+      });
+      // var content = `
+      //   <span class="info-title">
+      //       <ul style='list-style:none;'>
+      //         <li>
+      //           <input type='button' value='추가'/>
+      //         </li>
+      //         <li>
+      //           <input type='button' value='삭제'/>
+      //         </li>
+      //         </ul>
+      //    </span>
+      //   `;
+
+      var content = `<span class="info-title">
+           <ul style='list-style:none;'>
               <li>
                 <input type='button' value='추가'/>
-              </li> 
+              </li>
               <li>
                 <input type='button' value='삭제'/>
-              </li> 
-              </ul>
-         </div>
-        `;
+              </li>
+            </ul>
+      </span>`;
       this.menuInfowindow.setContent(content);
+    },
+    infowonodwReset() {
+      var infoTitle = document.querySelectorAll(".info-title");
+      infoTitle.forEach(function (e) {
+        var w = e.offsetWidth + 10;
+        var ml = w / 2;
+        e.parentElement.style.top = "82px";
+        e.parentElement.style.left = "50%";
+        e.parentElement.style.marginLeft = -ml + "px";
+        e.parentElement.style.width = w + "px";
+        e.parentElement.previousSibling.style.display = "none";
+        e.parentElement.parentElement.style.border = "0px";
+        e.parentElement.parentElement.style.background = "unset";
+      });
     },
   },
   mounted() {},
@@ -215,5 +248,17 @@ export default {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.info-title {
+  display: block;
+  background: #50627f;
+  color: #fff;
+  text-align: center;
+  /* height: 24px; */
+  height: 58px;
+  line-height: 22px;
+  border-radius: 4px;
+  padding: 0px 10px;
 }
 </style>
