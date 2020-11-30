@@ -72,11 +72,18 @@ export default {
 
       this.geocoder = new kakao.maps.services.Geocoder();
 
-      // console.log(new kakao.maps.services.Geocode())
-
       this.addInfo(this.map);
       this.createInforMenu();
 
+            // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+      var mapTypeControl = new kakao.maps.MapTypeControl();
+      map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+      // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+      var zoomControl = new kakao.maps.ZoomControl();
+      map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+      
       // 중심 좌표나 확대 수준이 변경됐을 때 지도 중심 좌표에 대한 주소 정보를 표시하도록 이벤트를 등록합니다
       kakao.maps.event.addListener(map, "idle", () => {
         this.searchAddrFromCoords(map.getCenter(), this.displayCenterInfo);
@@ -182,16 +189,12 @@ export default {
       //    </span>
       //   `;
 
-      var content = `<span class="info-title">
-           <ul style='list-style:none;'>
-              <li>
-                <input type='button' value='추가'/>
-              </li>
-              <li>
-                <input type='button' value='삭제'/>
-              </li>
-            </ul>
-      </span>`;
+      var content = `
+        <span class="info-title">
+             <input type='button' value='추가'><br/>
+             <input type='button' value='삭제'>
+         </span>
+      `;
       this.menuInfowindow.setContent(content);
     },
     infowonodwReset() {
@@ -199,7 +202,7 @@ export default {
       infoTitle.forEach(function (e) {
         var w = e.offsetWidth + 10;
         var ml = w / 2;
-        e.parentElement.style.top = "82px";
+        e.parentElement.style.top = "112px"; // 82
         e.parentElement.style.left = "50%";
         e.parentElement.style.marginLeft = -ml + "px";
         e.parentElement.style.width = w + "px";
@@ -252,13 +255,12 @@ export default {
 
 .info-title {
   display: block;
-  background: #50627f;
-  color: #fff;
+  /* background: #50627f;
+  color: #fff; */
   text-align: center;
   /* height: 24px; */
-  height: 58px;
   line-height: 22px;
-  border-radius: 4px;
-  padding: 0px 10px;
+  /* border-radius: 4px;
+  padding: 0px 10px; */
 }
 </style>
