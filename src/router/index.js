@@ -6,7 +6,7 @@ import { IonicVueRouter } from '@ionic/vue';
 Vue.use(IonicVueRouter);
 
 export default new IonicVueRouter({
-  // mode: 'history',
+   mode: 'history',
   // base: process.env.BASE_URL,
   routes: [
     { path: "/", redirect: "/home" },
@@ -17,8 +17,8 @@ export default new IonicVueRouter({
         import(/* webpackChunkName: "home" */ "@/views/Home"),
     },
     {
-      path: "/new-item",
-      name: "new-item",
+      path: "/about",
+      name: "about",
       component: () =>
         import(/* webpackChunkName: "new-item" */ "@/views/About"),
     }

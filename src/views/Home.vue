@@ -48,6 +48,7 @@ export default {
       libraries: [], // 추가로 불러올 라이브러리
       map: null, // 지도 객체. 지도가 로드되면 할당됨.
       markers: [],
+      infowindow: null, // 인포 윈도우 참조 객체
     };
   },
   methods: {
@@ -62,23 +63,46 @@ export default {
       var zoomControl = new kakao.maps.ZoomControl();
       map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
-      kakao.maps.event.addListener(map, "rightclick", function (mouseEvent) {
-        var iwContent = '<div style="padding:5px;">Hello World!</div>', // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
-         iwPosition = mouseEvent.latLng; // new kakao.maps.LatLng(33.450701, 126.570667), //인포윈도우 표시 위치입니다
+      const createInfoWindow = (iwPosition) => {
+        var iwContent = `<div style="padding:5px;">
+          <input type="button" value="val" onclick="msg()"> </input>
+        </div>`; // 인포윈도우에 표출될 내용으로 HTML 문자열이나 document element가 가능합니다
+        //  iwPosition = iwPosition; // new kakao.maps.LatLng(33.450701, 126.570667), //인포윈도우 표시 위치입니다
         var iwRemoveable = true; // removeable 속성을 ture 로 설정하면 인포윈도우를 닫을 수 있는 x버튼이 표시됩니다
 
-        // 인포윈도우를 생성하고 지도에 표시합니다
         var infowindow = new kakao.maps.InfoWindow({
           map: map, // 인포윈도우가 표시될 지도
           position: iwPosition,
           content: iwContent,
           removable: iwRemoveable,
         });
-       
-        //infowindow.close();   
-        // console.log("rightClick", mouseEvent);
+
+        return infowindow;
+      };
+
+      kakao.maps.event.addListener(map, "rightclick", (e) => {
+        console.log("멍미", this.infowindow);
+
+        this.infowindow = createInfoWindow(e.latLng);
+        // //마커를 생성합니다
+        // var marker = new kakao.maps.Marker({
+        //   position: e.latLng,
+        // });
+
+        // // 마커가 지도 위에 표시되도록 설정합니다
+        // marker.setMap(map);
+
+        // // 마커가 드래그 가능하도록 설정합니다
+        // marker.setDraggable(true);
       });
     },
+  },
+  mounted() {
+    console.log(window);
+
+    window.msg = () => {
+      console.log("멍미2", this.infowindow);
+    };
   },
 };
 </script>
