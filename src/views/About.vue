@@ -45,6 +45,8 @@
 import MdMenuIcon from "vue-ionicons/dist/md-menu.vue";
 
 import VueDaumMap from "vue-daum-map";
+import axios from 'axios'
+
 
 export default {
   components: {
@@ -212,7 +214,24 @@ export default {
       });
     },
   },
-  mounted() {},
+  mounted() {
+
+   const url = "http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptRent?serviceKey=MX10Aka9ep9GlW47v7ugj9cGJBza6TPb8WMahDGVMfFe5j1vZCqyohj8BGz0OdVi86m%2BL35mHSWW2ItwO30ZQA%3D%3D&LAWD_CD=11110&DEAL_YMD=201512"
+  
+  
+  console.log(encodeURI(url))
+
+var config = {
+    headers: {'Access-Control-Allow-Origin': '*'}
+};
+
+    axios.get(url,config).then(res =>{
+
+      alert('Res')
+    })
+
+
+  },
 };
 </script>
 

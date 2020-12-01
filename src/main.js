@@ -6,6 +6,10 @@ import router from './router'
 import "@ionic/core/css/core.css";
 import "@ionic/core/css/ionic.bundle.css";
 
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+
+Vue.use(VueAxios, axios)
 
 Vue.config.productionTip = false;
 Vue.use(Ionic);
