@@ -25,6 +25,9 @@ AppPlugIn.install = function (Vue, options) {
             openStart() {
                 document.querySelector("ion-menu-controller").open("start");
             },
+            closeStart() {
+                document.querySelector("ion-menu-controller").close("start");
+            },
             openEnd() {
                 document.querySelector("ion-menu-controller").open("end");
             },

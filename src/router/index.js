@@ -17,10 +17,22 @@ export default new IonicVueRouter({
         import(/* webpackChunkName: "home" */ "@/views/Home"),
     },
     {
-      path: "/about",
-      name: "about",
+      path: "/menu1",
+      name: "menu1",
       component: () =>
-        import(/* webpackChunkName: "new-item" */ "@/views/About"),
+        import(/* webpackChunkName: "new-item" */ "@/views/Menu1"),
+    },
+    {
+      path: "/menu2",
+      name: "menu2",
+      component: () =>
+        import(/* webpackChunkName: "new-item" */ "@/views/Menu2"),
+    },
+    {
+      path: "/menu3",
+      name: "menu3",
+      component: () =>
+        import(/* webpackChunkName: "new-item" */ "@/views/Menu3"),
     }
   ]
 });

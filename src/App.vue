@@ -2,7 +2,7 @@
   <div id="app">
     <ion-app>
       <menu-left/>
-      <ion-vue-router id="my-content" />
+      <ion-vue-router id="menu-content" main />
     </ion-app>
     <ion-menu-controller></ion-menu-controller>
   </div>
