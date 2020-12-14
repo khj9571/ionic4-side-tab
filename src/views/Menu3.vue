@@ -88,6 +88,7 @@ export default {
   },
   methods: {
     onLoad(map) {
+      
       this.map = map;
 
       this.geocoder = new kakao.maps.services.Geocoder();

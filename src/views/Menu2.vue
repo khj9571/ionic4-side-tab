@@ -5,7 +5,7 @@
         <span @click="openStart" slot="start">
           <MdMenuIcon w="40px" h="40px" />
         </span>
-        <ion-title>Menu - Basic</ion-title>
+        <ion-title>Menu2</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>

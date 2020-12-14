@@ -45,7 +45,7 @@ export default {
       center: { lat: 37.5309123241908, lng: 127.0007353858026 }, // 지도의 중심 좌표 33.450701, 126.570667
       level: 13, // 지도의 레벨(확대, 축소 정도),127.0007353858026 /  37.5309123241908
       mapTypeId: VueDaumMap.MapTypeId.NORMAL, // 맵 타입
-      libraries: [], // 추가로 불러올 라이브러리
+      libraries: ["services"], // 추가로 불러올 라이브러리
       map: null, // 지도 객체. 지도가 로드되면 할당됨.
       markers: [],
       infowindow: null, // 인포 윈도우 참조 객체
