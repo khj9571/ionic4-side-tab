@@ -116,7 +116,8 @@
 //   "md-map": map.md
 // });
 
-import suoulMap from "../assets/maps/seoulMap.json";
+import seoulMapInfo from "../assets/maps/seoulMap.json";
+import seoulLocaleInfo from "../assets/locales/seoulLocale.json";
 
 import MdMenuIcon from "vue-ionicons/dist/md-menu.vue";
 
@@ -148,137 +149,7 @@ export default {
       customOverlay: null,
       polygonInfoWindow: null,
       areas: [],
-      options: [
-        {
-          label: "강서",
-          options: [
-            {
-              label: "강서구",
-              value: "1",
-              pos: {
-                lat: "37.54651343725801",
-                lng: "126.81858220529665",
-              },
-            },
-            {
-              label: "양천구",
-              value: "2",
-              pos:{
-                lat: "37.508995682739055",
-                lng: "126.84373668164855"
-              }
-            },
-            {
-              label: "구로구",
-              value: "3",
-            },
-            {
-              label: "영등포구",
-              value: "4",
-            },
-            {
-              label: "금천구",
-              value: "5",
-            },
-          ],
-        },
-        {
-          label: "강동",
-          options: [
-            {
-              label: "강동구",
-              value: "6",
-            },
-            {
-              label: "송파구",
-              value: "7",
-            },
-            {
-              label: "광진구",
-              value: "8",
-            },
-            {
-              label: "중량구",
-              value: "9",
-            },
-          ],
-        },
-        {
-          label: "강남",
-          options: [
-            {
-              label: "강남구",
-              value: "10",
-            },
-            {
-              label: "서초",
-              value: "11",
-            },
-            {
-              label: "동작",
-              value: "12",
-            },
-          ],
-        },
-        {
-          label: "중구",
-          options: [
-            {
-              label: "중구",
-              value: "13",
-            },
-            {
-              label: "용산",
-              value: "14",
-            },
-            {
-              label: "성동",
-              value: "15",
-            },
-            {
-              label: "마포",
-              value: "16",
-            },
-            {
-              label: "서대문",
-              value: "17",
-            },
-            {
-              label: "종로",
-              value: "18",
-            },
-            {
-              label: "동대문",
-              value: "19",
-            },
-          ],
-        },
-        {
-          label: "강북",
-          options: [
-            {
-              label: "강북구",
-              value: "20",
-            },
-            {
-              label: "은평구",
-              value: "21",
-            },
-            {
-              label: "성북구",
-              value: "22",
-            },
-            {
-              label: "도봉구",
-              value: "23",
-            },
-            {
-              label: "노원구",
-              value: "24",
-            },
-          ],
-        },
-      ],
+      options: seoulLocaleInfo.list,
       value: "",
     };
   },
@@ -291,7 +162,7 @@ export default {
       this.customOverlay = new kakao.maps.CustomOverlay({});
       this.polygonInfoWindow = new kakao.maps.InfoWindow({ removable: true });
 
-      // this.addInfo(this.map);
+      this.addInfo(this.map);
       this.createInforMenu();
       this.loadMapData();
 
@@ -314,21 +185,23 @@ export default {
 
       kakao.maps.event.addListener(map, "center_changed", function () {
         // 지도의  레벨을 얻어옵니다
-        var level = map.getLevel();
+        // var level = map.getLevel();
 
-        // 지도의 중심좌표를 얻어옵니다
-        var latlng = map.getCenter();
+        // // 지도의 중심좌표를 얻어옵니다
+        // var latlng = map.getCenter();
 
-        var message = ""//"<p>지도 레벨은 " + level + " 이고</p>";
-        message +=
-          "<p>중심 좌표는 위도 " +
-          latlng.getLat() +
-          ", 경도 " +
-          latlng.getLng() + "레벨 =>" + level+ 
-          "</p>";
+        // var message = ""; //"<p>지도 레벨은 " + level + " 이고</p>";
+        // message +=
+        //   "<p>중심 좌표는 위도 " +
+        //   latlng.getLat() +
+        //   ", 경도 " +
+        //   latlng.getLng() +
+        //   "레벨 =>" +
+        //   level +
+        //   "</p>";
 
-        var resultDiv = document.getElementById("result");
-        resultDiv.innerHTML = message;
+        // var resultDiv = document.getElementById("result");
+        // resultDiv.innerHTML = message;
       });
     },
     addInfo(map) {
@@ -461,32 +334,40 @@ export default {
         strokeWeight: 2,
         strokeColor: "#004c80",
         strokeOpacity: 0.8,
-        // fillColor: "#fff",
-        fillOpacity: 0,
+        fillColor: "#fff",
+        fillOpacity: 0.1,
       });
 
       // 다각형에 mouseover 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 변경합니다
       // 지역명을 표시하는 커스텀오버레이를 지도위에 표시합니다
       kakao.maps.event.addListener(polygon, "mouseover", (mouseEvent) => {
-        polygon.setOptions({ fillColor: "#09f" });
+        polygon.setOptions({
+          fillColor: "#fff",
+          fillOpacity: 0.1,
+          strokeWeight: 5,
+        });
 
-        // this.customOverlay.setContent(
-        //   '<div class="area">' + area.name + "</div>"
-        // );
+        var content = "<div class='area'>" + area.name + "</div>";
 
-        // this.customOverlay.setPosition(mouseEvent.latLng);
-        // this.customOverlay.setMap(this.map);
+        this.customOverlay.setContent(content);
+
+        this.customOverlay.setPosition(mouseEvent.latLng);
+        this.customOverlay.setMap(this.map);
       });
 
       // 다각형에 mousemove 이벤트를 등록하고 이벤트가 발생하면 커스텀 오버레이의 위치를 변경합니다
       kakao.maps.event.addListener(polygon, "mousemove", (mouseEvent) => {
-        // this.customOverlay.setPosition(mouseEvent.latLng);
+        this.customOverlay.setPosition(mouseEvent.latLng);
       });
 
       // 다각형에 mouseout 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 원래색으로 변경합니다
       // 커스텀 오버레이를 지도에서 제거합니다
       kakao.maps.event.addListener(polygon, "mouseout", () => {
-        polygon.setOptions({ fillColor: "#fff" });
+        polygon.setOptions({
+          fillColor: "#fff",
+          fillOpacity: 0.1,
+          strokeWeight: 2,
+        });
         this.customOverlay.setMap(null);
       });
 
@@ -507,7 +388,7 @@ export default {
       });
     },
     loadMapData() {
-      const areas = suoulMap.features.map((d, idx) => {
+      const areas = seoulMapInfo.features.map((d, idx) => {
         const { name } = d.properties;
         const [coordinates] = d.geometry.coordinates;
         const path = [];
@@ -548,7 +429,9 @@ export default {
 
       //{ lat: 37.5309123241908, lng: 127.0007353858026 }
 
-      const pos = { ...currentObj.pos };
+      const { pos } = currentObj;
+
+      console.log(pos);
 
       if (JSON.stringify(pos) == "{}") return;
 
@@ -557,7 +440,10 @@ export default {
       var moveLatLon = new kakao.maps.LatLng(lat, lng);
 
       this.map.setLevel(7);
-      this.map.panTo(moveLatLon);
+
+      this.$nextTick(() => {
+        this.map.panTo(moveLatLon);
+      });
     },
   },
   created() {},
@@ -604,11 +490,25 @@ export default {
   margin-top: 2px;
   font-weight: normal;
 }
-.bAddr {
-  padding: 5px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+
+/deep/ {
+  .bAddr {
+    padding: 5px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .area {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 3px;
+    font-size: 12px;
+    top: -5px;
+    left: 15px;
+    padding: 2px;
+  }
 }
 
 .info-title {
@@ -620,17 +520,6 @@ export default {
   line-height: 22px;
   /* border-radius: 4px;
   padding: 0px 10px; */
-}
-
-.area {
-  position: absolute;
-  background: #fff;
-  border: 1px solid #888;
-  border-radius: 3px;
-  font-size: 12px;
-  top: -5px;
-  left: 15px;
-  padding: 2px;
 }
 
 .info {
