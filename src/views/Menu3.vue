@@ -36,22 +36,37 @@
         <el-form ref="form" :model="form" label-width="120px">
           <el-row>
             <el-col :span="8">
-              <el-form-item label="Activity name">
+              <el-form-item label="지역구 선택">
+                <el-select
+                  v-model="form.selectedLocale"
+                  multiple
+                  collapse-tags
+                  style="margin-left: 20px"
+                  placeholder="Select"
+                >
+                  <el-option
+                    v-for="item in localList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                    :disabled="item.disabled"
+                  >
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="매물형태">
                 <el-input v-model="form.name"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="Activity name">
-                <el-input v-model="form.name"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="Activity name">
+              <el-form-item label="가격">
                 <el-input v-model="form.name"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
+          <!-- <el-row>
             <el-col :span="8">
               <el-form-item label="Activity name">
                 <el-input v-model="form.name"></el-input>
@@ -67,7 +82,7 @@
                 <p id="result"></p>
               </el-form-item>
             </el-col>
-          </el-row>
+          </el-row> -->
           <!-- <el-row>
             <el-col :span="8"
               ><div class="grid-content bg-purple">4</div></el-col
@@ -145,12 +160,16 @@ export default {
       mapVisible: false,
       form: {
         name: "",
+        selectedLocale: [],
       },
       customOverlay: null,
       polygonInfoWindow: null,
       areas: [],
       options: seoulLocaleInfo.list,
+      localList: [],
       value: "",
+      polygonMap: {},
+      currentPolyObj: null,
     };
   },
   methods: {
@@ -186,10 +205,8 @@ export default {
       kakao.maps.event.addListener(map, "center_changed", function () {
         // 지도의  레벨을 얻어옵니다
         // var level = map.getLevel();
-
         // // 지도의 중심좌표를 얻어옵니다
         // var latlng = map.getCenter();
-
         // var message = ""; //"<p>지도 레벨은 " + level + " 이고</p>";
         // message +=
         //   "<p>중심 좌표는 위도 " +
@@ -199,47 +216,86 @@ export default {
         //   "레벨 =>" +
         //   level +
         //   "</p>";
-
         // var resultDiv = document.getElementById("result");
         // resultDiv.innerHTML = message;
       });
     },
     addInfo(map) {
       var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
-        infowindow = new kakao.maps.InfoWindow({ zindex: 1 }); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+        // infowindow = new kakao.maps.InfoWindow({ zindex: 1 }); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+        // 커스텀 오버레이를 생성합니다
+        infowindow = new kakao.maps.CustomOverlay({
+          clickable: true,
+          position: null,
+          content: null,
+          xAnchor: 0.5, // 커스텀 오버레이의 x축 위치입니다. 1에 가까울수록 왼쪽에 위치합니다. 기본값은 0.5 입니다
+          yAnchor: 1.1, // 커스텀 오버레이의 y축 위치입니다. 1에 가까울수록 위쪽에 위치합니다. 기본값은 0.5 입니다
+        });
+      this.infowindow = infowindow;
 
       kakao.maps.event.addListener(map, "click", (mouseEvent) => {
         if (this.displayedMenuInfowindow) {
-          console.log(this.menuInfowindow);
           this.menuInfowindow.close();
           this.displayedMenuInfowindow = false;
         }
 
         this.searchDetailAddrFromCoords(mouseEvent.latLng, (result, status) => {
-          console.log(mouseEvent);
+          //  console.log(mouseEvent);
 
           if (status === kakao.maps.services.Status.OK) {
-            var detailAddr = !!result[0].road_address
-              ? "<div>도로명주소 : " +
-                result[0].road_address.address_name +
-                "</div>"
-              : "";
-            detailAddr +=
-              "<div>지번 주소 : " + result[0].address.address_name + "</div>";
+            //console.log(result);
 
-            var content =
-              '<div class="bAddr">' +
-              '<span class="title">법정동 주소정보</span>' +
-              detailAddr +
-              "</div>";
+            var detailAddr = result[0].address.address_name;
 
-            // 마커를 클릭한 위치에 표시합니다
+            var content = `<div class="wrap"> 
+            <div class="info">
+                    <div class="title"> 
+                        주소
+                        <div id="closeBtn" class="close" @click="closeOverlay()" title="닫기"></div> 
+                    </div> 
+                    <div class="body"> 
+                        <div class="desc"> 
+                            <div class="ellipsis">${detailAddr}</div> 
+                        </div>
+                    </div>
+                </div>    
+            </div>`;
+
+            infowindow.setPosition(mouseEvent.latLng);
+            infowindow.setContent(content);
+
+            infowindow.setMap(map);
+
+            // var detailAddr = !!result[0].road_address
+            //   ? "<div>도로명주소 : " +
+            //     result[0].road_address.address_name +
+            //     "</div>"
+            //   : "";
+            // detailAddr +=
+            //   "<div>지번 주소 : " + result[0].address.address_name + "</div>";
+
+            // var content =
+            //   '<div class="bAddr">' +
+            //   '<span class="title">법정동 주소정보</span>' +
+            //   detailAddr +
+            //   "</div>";
+
+            // // 마커를 클릭한 위치에 표시합니다 마커와 포지션 일단 주석
             marker.setPosition(mouseEvent.latLng);
             marker.setMap(map);
 
-            // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
-            infowindow.setContent(content);
-            infowindow.open(map, marker);
+            this.$nextTick(() => {
+              var btn = document.getElementById("closeBtn");
+              btn.onclick = (e) => {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                this.infowindow.setMap(null);
+              };
+            });
+            // // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+            // infowindow.setContent(content);
+            // infowindow.open(map, marker);
           }
         });
       });
@@ -338,6 +394,8 @@ export default {
         fillOpacity: 0.1,
       });
 
+      this.polygonMap[area.code] = polygon;
+
       // 다각형에 mouseover 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 변경합니다
       // 지역명을 표시하는 커스텀오버레이를 지도위에 표시합니다
       kakao.maps.event.addListener(polygon, "mouseover", (mouseEvent) => {
@@ -365,6 +423,7 @@ export default {
       kakao.maps.event.addListener(polygon, "mouseout", () => {
         polygon.setOptions({
           fillColor: "#fff",
+          strokeColor: "#004c80",
           fillOpacity: 0.1,
           strokeWeight: 2,
         });
@@ -389,7 +448,7 @@ export default {
     },
     loadMapData() {
       const areas = seoulMapInfo.features.map((d, idx) => {
-        const { name } = d.properties;
+        const { name, code } = d.properties;
         const [coordinates] = d.geometry.coordinates;
         const path = [];
 
@@ -400,6 +459,7 @@ export default {
 
         const obj = {
           name: name,
+          code: code,
           path: path,
         };
 
@@ -429,7 +489,7 @@ export default {
 
       //{ lat: 37.5309123241908, lng: 127.0007353858026 }
 
-      const { pos } = currentObj;
+      const { pos, code } = currentObj;
 
       console.log(pos);
 
@@ -443,15 +503,52 @@ export default {
 
       this.$nextTick(() => {
         this.map.panTo(moveLatLon);
+
+        if (this.currentPolyObj) {
+          this.currentPolyObj.setOptions({
+            fillColor: "#fff",
+            strokeColor: "#004c80",
+            fillOpacity: 0.1,
+            strokeWeight: 2,
+          });
+        }
+
+        this.polygonMap[code].setOptions({
+          strokeColor: "#ff0000",
+          fillColor: "#fff",
+          fillOpacity: 0.1,
+          strokeWeight: 5,
+        });
+
+        this.currentPolyObj = this.polygonMap[code];
       });
     },
+    closeOverlay() {
+      alert("A");
+    },
   },
-  created() {},
+  created() {
+    var temp = [];
+    seoulLocaleInfo.list.forEach((d) => {
+      d.options.map((f) => {
+        f.disabled = true;
+        return f;
+      });
+
+      temp = temp.concat(d.options);
+    });
+
+    this.localList = temp;
+
+    console.log("확인", temp);
+  },
   mounted() {
     //  this.$nextTick(()=>{
     //    this.mapSize = true
     //  });
     //this.mapVisible = true
+
+    //element.getElementById("closeBtn")
 
     setTimeout(() => {
       this.mapVisible = true;
@@ -545,6 +642,101 @@ export default {
   margin-bottom: 10px;
   &:last-child {
     margin-bottom: 0;
+  }
+}
+
+/deep/ {
+  .wrap {
+    position: absolute;
+    left: 0;
+    bottom: 40px;
+    width: 288px;
+    height: 132px;
+    margin-left: -144px;
+    text-align: left;
+    overflow: hidden;
+    font-size: 12px;
+    font-family: "Malgun Gothic", dotum, "돋움", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap * {
+    padding: 0;
+    margin: 0;
+  }
+  .wrap .info {
+    width: 286px;
+    height: 120px;
+    border-radius: 5px;
+    border-bottom: 2px solid #ccc;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+    background: #fff;
+  }
+  .wrap .info:nth-child(1) {
+    border: 0;
+    box-shadow: 0px 1px 2px #888;
+  }
+  .info .title {
+    padding: 5px 0 0 10px;
+    height: 30px;
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .info .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #888;
+    width: 17px;
+    height: 17px;
+    background: url("https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png");
+  }
+  .info .close:hover {
+    cursor: pointer;
+  }
+  .info .body {
+    position: relative;
+    overflow: hidden;
+  }
+  .info .desc {
+    position: relative;
+    margin: 13px 0 0 90px;
+    height: 75px;
+  }
+  .desc .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .desc .jibun {
+    font-size: 11px;
+    color: #888;
+    margin-top: -2px;
+  }
+  .info .img {
+    position: absolute;
+    top: 6px;
+    left: 5px;
+    width: 73px;
+    height: 71px;
+    border: 1px solid #ddd;
+    color: #888;
+    overflow: hidden;
+  }
+  .info:after {
+    content: "";
+    position: absolute;
+    margin-left: -12px;
+    left: 50%;
+    bottom: 0;
+    width: 22px;
+    height: 12px;
+    background: url("https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png");
+  }
+  .info .link {
+    color: #5085bb;
   }
 }
 </style>

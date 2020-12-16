@@ -2,6 +2,12 @@ const AppPlugIn = {};
 
 AppPlugIn.install = function (Vue, options) {
     console.log('안녕')
+    console.log(window)
+
+
+
+    
+    
 
     // 1. 전역 메소드 또는 속성 추가
     // Vue.myGlobalMethod = function () {
