@@ -62,38 +62,11 @@
             </el-col>
             <el-col :span="8">
               <el-form-item label="가격">
-                <el-input v-model="form.name"></el-input>
+                <el-slider v-model="form.price" range show-stops :max="10">
+                </el-slider>
               </el-form-item>
             </el-col>
           </el-row>
-          <!-- <el-row>
-            <el-col :span="8">
-              <el-form-item label="Activity name">
-                <el-input v-model="form.name"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="Activity name">
-                <el-input v-model="form.name"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="Activity name">
-                <p id="result"></p>
-              </el-form-item>
-            </el-col>
-          </el-row> -->
-          <!-- <el-row>
-            <el-col :span="8"
-              ><div class="grid-content bg-purple">4</div></el-col
-            >
-            <el-col :span="8"
-              ><div class="grid-content bg-purple-light">5</div></el-col
-            >
-            <el-col :span="8"
-              ><div class="grid-content bg-purple">6</div></el-col
-            >
-          </el-row> -->
         </el-form>
       </div>
 
@@ -161,6 +134,7 @@ export default {
       form: {
         name: "",
         selectedLocale: [],
+        price: "",
       },
       customOverlay: null,
       polygonInfoWindow: null,
@@ -235,32 +209,55 @@ export default {
       this.infowindow = infowindow;
 
       kakao.maps.event.addListener(map, "click", (mouseEvent) => {
-        if (this.displayedMenuInfowindow) {
-          this.menuInfowindow.close();
-          this.displayedMenuInfowindow = false;
-        }
+        // if (this.displayedMenuInfowindow) {
+        //   this.menuInfowindow.close();
+        //   this.displayedMenuInfowindow = false;
+        // }
 
         this.searchDetailAddrFromCoords(mouseEvent.latLng, (result, status) => {
           //  console.log(mouseEvent);
 
           if (status === kakao.maps.services.Status.OK) {
-            //console.log(result);
+            console.log(result);
 
-            var detailAddr = result[0].address.address_name;
+            var roadNmAddr =
+              result[0].road_address != null
+                ? result[0].road_address.address_name
+                : "";
+            var addrNm = result[0].address.address_name;
 
             var content = `<div class="wrap"> 
             <div class="info">
                     <div class="title"> 
                         주소
-                        <div id="closeBtn" class="close" @click="closeOverlay()" title="닫기"></div> 
+                        <div id="btnClose" class="close" @click="closeOverlay()" title="닫기"></div> 
                     </div> 
                     <div class="body"> 
                         <div class="desc"> 
-                            <div class="ellipsis">${detailAddr}</div> 
+                          <table>
+                          <tbody>
+                            <tr style="height:25px">
+                              <th>도로명:</th>
+                              <td><div class="ellipsis">${roadNmAddr}</div></td>
+                            </tr>
+                             <tr style="height:25px">
+                              <th>지번:</th>
+                              <td><div class="ellipsis">${addrNm}</div></td>
+                            </tr>
+                            <tr style="height:30px">
+                              <td colspan="2" style="text-align:center">
+                                <input id="btnReg" type="button" value="등록"/>
+                                <input id="btnCencle" type="button" value="취소"/>
+                              </td>
+                            </tr>
+                           </tbody>  
+                          </table>
                         </div>
                     </div>
                 </div>    
             </div>`;
+
+            this.displayedMenuInfowindow = true;
 
             infowindow.setPosition(mouseEvent.latLng);
             infowindow.setContent(content);
@@ -286,11 +283,23 @@ export default {
             marker.setMap(map);
 
             this.$nextTick(() => {
-              var btn = document.getElementById("closeBtn");
-              btn.onclick = (e) => {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
+              var closeBtn = document.getElementById("btnClose");
+              var regBtn = document.getElementById("btnReg");
+              var cencleBtn = document.getElementById("btnCencle");
+
+              const onClose = (e) => {
+                // e.stopImmediatePropagation();
+                // e.stopPropagation();
                 this.infowindow.setMap(null);
+                this.displayedMenuInfowindow = false;
+                marker.setMap(null);
+              };
+
+              closeBtn.onclick = onClose;
+              cencleBtn.onclick = onClose;
+
+              regBtn.onclick = (e) => {
+                alert("reg");
               };
             });
             // // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
@@ -304,15 +313,23 @@ export default {
       kakao.maps.event.addListener(marker, "click", () => {
         // 마커 위에 인포윈도우를 표시합니다
 
-        if (!this.displayedMenuInfowindow) {
-          this.menuInfowindow.open(map, marker);
-          this.displayedMenuInfowindow = true;
-
-          this.infowonodwReset();
-        } else {
-          this.menuInfowindow.close();
+        if (this.displayedMenuInfowindow) {
+          this.infowindow.setMap(null);
           this.displayedMenuInfowindow = false;
+        } else {
+          infowindow.setMap(map);
+          this.displayedMenuInfowindow = true;
         }
+
+        // if (!this.displayedMenuInfowindow) {
+        //   this.menuInfowindow.open(map, marker);
+        //   this.displayedMenuInfowindow = true;
+
+        //   this.infowonodwReset();
+        // } else {
+        //   this.menuInfowindow.close();
+        //   this.displayedMenuInfowindow = false;
+        // }
       });
     },
     searchAddrFromCoords(coords, callback) {
@@ -400,6 +417,7 @@ export default {
       // 지역명을 표시하는 커스텀오버레이를 지도위에 표시합니다
       kakao.maps.event.addListener(polygon, "mouseover", (mouseEvent) => {
         polygon.setOptions({
+          strokeColor: "#ff0000",
           fillColor: "#fff",
           fillOpacity: 0.1,
           strokeWeight: 5,
@@ -531,12 +549,14 @@ export default {
     var temp = [];
     seoulLocaleInfo.list.forEach((d) => {
       d.options.map((f) => {
-        f.disabled = true;
+        f.disabled = false;
         return f;
       });
 
       temp = temp.concat(d.options);
     });
+
+    temp.unshift({ label: "전체", value: "all" });
 
     this.localList = temp;
 
@@ -702,8 +722,9 @@ export default {
   }
   .info .desc {
     position: relative;
-    margin: 13px 0 0 90px;
-    height: 75px;
+    margin: 0px 0 0 0px;
+    height: 85px;
+    padding: 1px;
   }
   .desc .ellipsis {
     overflow: hidden;
@@ -737,6 +758,19 @@ export default {
   }
   .info .link {
     color: #5085bb;
+  }
+
+  table {
+    width: 100%;
+  }
+  table,
+  th,
+  td {
+    border: 1px solid #bcbcbc;
+    padding: 5px;
+  }
+  th {
+    text-align: center;
   }
 }
 </style>
