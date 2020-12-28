@@ -43,6 +43,7 @@
                   collapse-tags
                   style="margin-left: 20px"
                   placeholder="Select"
+                  @change="onChangeRegion"
                 >
                   <el-option
                     v-for="item in localList"
@@ -91,7 +92,41 @@
           <span class="title">지도중심기준 행정동 주소정보</span>
           <span id="centerAddr"></span>
         </div>
+
+        <!-- <div id="menu_wrap" class="bg_white">
+          <div class="option">
+            <div>
+              <form onsubmit="searchPlaces(); return false;">
+                키워드 :
+                <input type="text" value="이태원 맛집" id="keyword" size="15" />
+                <button type="submit">검색하기</button>
+              </form>
+            </div>
+          </div>
+          <hr />
+          <ul id="placesList"></ul>
+          <div id="pagination"></div>
+        </div> -->
       </div>
+
+      <el-dialog
+        title="Warning"
+        :visible.sync="centerDialogVisible"
+        width="30%"
+        center
+        append-to-body
+      >
+        <span
+          >It should be noted that the content will not be aligned in center by
+          default</span
+        >
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="centerDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="centerDialogVisible = false"
+            >Confirm</el-button
+          >
+        </span>
+      </el-dialog>
     </ion-content>
   </div>
 </template>
@@ -134,7 +169,7 @@ export default {
       form: {
         name: "",
         selectedLocale: [],
-        price: "",
+        price: 1,
       },
       customOverlay: null,
       polygonInfoWindow: null,
@@ -144,6 +179,7 @@ export default {
       value: "",
       polygonMap: {},
       currentPolyObj: null,
+      centerDialogVisible: false,
     };
   },
   methods: {
@@ -156,7 +192,7 @@ export default {
       this.polygonInfoWindow = new kakao.maps.InfoWindow({ removable: true });
 
       this.addInfo(this.map);
-      this.createInforMenu();
+      //this.createInforMenu();
       this.loadMapData();
 
       this.areas.forEach((d) => {
@@ -299,7 +335,7 @@ export default {
               cencleBtn.onclick = onClose;
 
               regBtn.onclick = (e) => {
-                alert("reg");
+                this.centerDialogVisible = true;
               };
             });
             // // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
@@ -359,32 +395,32 @@ export default {
         }
       }
     },
-    createInforMenu() {
-      this.menuInfowindow = new kakao.maps.InfoWindow({
-        title: "메뉴",
-        zindex: 1,
-      });
-      // var content = `
-      //   <span class="info-title">
-      //       <ul style='list-style:none;'>
-      //         <li>
-      //           <input type='button' value='추가'/>
-      //         </li>
-      //         <li>
-      //           <input type='button' value='삭제'/>
-      //         </li>
-      //         </ul>
-      //    </span>
-      //   `;
+    // createInforMenu() {
+    //   this.menuInfowindow = new kakao.maps.InfoWindow({
+    //     title: "메뉴",
+    //     zindex: 1,
+    //   });
+    //   // var content = `
+    //   //   <span class="info-title">
+    //   //       <ul style='list-style:none;'>
+    //   //         <li>
+    //   //           <input type='button' value='추가'/>
+    //   //         </li>
+    //   //         <li>
+    //   //           <input type='button' value='삭제'/>
+    //   //         </li>
+    //   //         </ul>
+    //   //    </span>
+    //   //   `;
 
-      var content = `
-        <span class="info-title">
-             <input type='button' value='추가'><br/>
-             <input type='button' value='삭제'>
-         </span>
-      `;
-      this.menuInfowindow.setContent(content);
-    },
+    //   var content = `
+    //     <span class="info-title">
+    //          <input type='button' value='추가'><br/>
+    //          <input type='button' value='삭제'>
+    //      </span>
+    //   `;
+    //   this.menuInfowindow.setContent(content);
+    // },
     infowonodwReset() {
       var infoTitle = document.querySelectorAll(".info-title");
       infoTitle.forEach(function (e) {
@@ -543,6 +579,32 @@ export default {
     },
     closeOverlay() {
       alert("A");
+    },
+    onChangeRegion(d) {
+      if (d.includes("all") || this.localList.length - 1 == d.length) {
+        this.localList.forEach((d, idx) => {
+          if (idx != 0) d.disabled = true;
+        });
+        this.form.selectedLocale = ["all"];
+      } else {
+        // if (this.localList.length - 1 == d.length) {
+        // } else {
+        this.localList.forEach((d, idx) => {
+          if (idx != 0) d.disabled = false;
+        });
+        //}
+      }
+
+      // if (d.length == 1 && d[0] == "all") {
+      //   console.log("맞음");
+      //   this.localList.forEach((d, idx) => {
+      //     if (idx != 0) d.disabled = true;
+      //   });
+      // } else if (d.length == 0) {
+      //   this.localList.forEach((d, idx) => {
+      //     if (idx != 0) d.disabled = false;
+      //   });
+      // }
     },
   },
   created() {
@@ -772,5 +834,41 @@ export default {
   th {
     text-align: center;
   }
+
+  //search
+
+  #menu_wrap {position:absolute;top:0;left:0;bottom:0;width:250px;margin:10px 0 30px 10px;padding:5px;overflow-y:auto;background:rgba(255, 255, 255, 0.7);z-index: 1;font-size:12px;border-radius: 10px;}
+.bg_white {background:#fff;}
+#menu_wrap hr {display: block; height: 1px;border: 0; border-top: 2px solid #5F5F5F;margin:3px 0;}
+#menu_wrap .option{text-align: center;}
+#menu_wrap .option p {margin:10px 0;}  
+#menu_wrap .option button {margin-left:5px;}
+#placesList li {list-style: none;}
+#placesList .item {position:relative;border-bottom:1px solid #888;overflow: hidden;cursor: pointer;min-height: 65px;}
+#placesList .item span {display: block;margin-top:4px;}
+#placesList .item h5, #placesList .item .info {text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+#placesList .item .info{padding:10px 0 10px 55px;}
+#placesList .info .gray {color:#8a8a8a;}
+#placesList .info .jibun {padding-left:26px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png) no-repeat;}
+#placesList .info .tel {color:#009900;}
+#placesList .item .markerbg {float:left;position:absolute;width:36px; height:37px;margin:10px 0 0 10px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png) no-repeat;}
+#placesList .item .marker_1 {background-position: 0 -10px;}
+#placesList .item .marker_2 {background-position: 0 -56px;}
+#placesList .item .marker_3 {background-position: 0 -102px}
+#placesList .item .marker_4 {background-position: 0 -148px;}
+#placesList .item .marker_5 {background-position: 0 -194px;}
+#placesList .item .marker_6 {background-position: 0 -240px;}
+#placesList .item .marker_7 {background-position: 0 -286px;}
+#placesList .item .marker_8 {background-position: 0 -332px;}
+#placesList .item .marker_9 {background-position: 0 -378px;}
+#placesList .item .marker_10 {background-position: 0 -423px;}
+#placesList .item .marker_11 {background-position: 0 -470px;}
+#placesList .item .marker_12 {background-position: 0 -516px;}
+#placesList .item .marker_13 {background-position: 0 -562px;}
+#placesList .item .marker_14 {background-position: 0 -608px;}
+#placesList .item .marker_15 {background-position: 0 -654px;}
+#pagination {margin:10px auto;text-align: center;}
+#pagination a {display:inline-block;margin-right:10px;}
+#pagination .on {font-weight: bold; cursor: default;color:#777;}
 }
 </style>

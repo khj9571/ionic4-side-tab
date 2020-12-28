@@ -23,10 +23,14 @@
             active-text-color="#ffd04b"
             router
           >
+           <el-menu-item index="0" :route="{ name:'search'}">
+              <i class="el-icon-menu"></i>
+              <span>매물찾기</span>
+            </el-menu-item>
             <el-submenu index="1">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>Navigator One</span>
+                <span>매물관리</span>
               </template>
               <el-menu-item-group>
                 <el-menu-item index="1-1" :route="{ name:'menu1'}">Menu1</el-menu-item>
@@ -48,15 +52,15 @@
             </el-submenu>
             <el-menu-item index="2">
               <i class="el-icon-menu"></i>
-              <span>Navigator Two</span>
+              <span>Blank</span>
             </el-menu-item>
             <el-menu-item index="3" disabled>
               <i class="el-icon-document"></i>
-              <span>Navigator Three</span>
+              <span>Blank</span>
             </el-menu-item>
             <el-menu-item index="4">
               <i class="el-icon-setting"></i>
-              <span>Navigator Four</span>
+              <span>Blank</span>
             </el-menu-item>
           </el-menu>
         </el-col>

@@ -17,6 +17,12 @@ export default new IonicVueRouter({
         import(/* webpackChunkName: "home" */ "@/views/Home"),
     },
     {
+      path: "/search",
+      name: "search",
+      component: () =>
+        import(/* webpackChunkName: "home" */ "@/views/Search"),
+    },
+    {
       path: "/menu1",
       name: "menu1",
       component: () =>
